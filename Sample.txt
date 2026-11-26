@@ -1,53 +1,84 @@
-sample
 
-function getInventory() {
-  const props = PropertiesService.getScriptProperties();
-  const token = props.getProperty('NOTION_TOKEN').trim();
-  const databaseId = props.getProperty('NOTION_DATABASE_ID').trim();
+<div class="section">
+  <h3>Inventory</h3>
 
-  const url = 'https://api.notion.com/v1/databases/' +
-              databaseId + '/query';
+  <input
+    type="text"
+    id="search"
+    placeholder="Search Hot Wheels..."
+    oninput="filterInventory()"
+    style="width:100%;padding:12px;margin-bottom:16px;border:1px solid #ddd;border-radius:8px;"
+  >
 
-  const response = UrlFetchApp.fetch(url, {
-    method: 'post',
-    headers: {
-      'Authorization': 'Bearer ' + token,
-      'Notion-Version': '2022-06-28',
-      'Content-Type': 'application/json'
-    },
-    payload: JSON.stringify({ page_size: 100 }),
-    muteHttpExceptions: true
-  });
+  <div id="inventoryList">
+    Loading inventory...
+  </div>
+</div>
 
-  const status = response.getResponseCode();
-  const data = JSON.parse(response.getContentText());
+<script>
+  let inventory = [];
 
-  if (status !== 200) {
-    throw new Error('Inventory fetch failed: ' + status +
-                    ' - ' + (data.message || 'Unknown error'));
+  function loadInventory() {
+    google.script.run
+      .withSuccessHandler(function(products) {
+        inventory = products;
+
+        document.getElementById('products').textContent =
+          products.length;
+
+        document.getElementById('stock').textContent =
+          products.reduce((sum, p) => sum + p.quantity, 0);
+
+        displayInventory(products);
+      })
+      .withFailureHandler(function(error) {
+        document.getElementById('inventoryList').textContent =
+          'Could not load inventory: ' + error.message;
+      })
+      .getInventory();
   }
 
-  return data.results.map(function(page) {
-    const p = page.properties;
+  function displayInventory(products) {
+    const container = document.getElementById('inventoryList');
 
-    const nameProperty = p.Name;
-    const name = nameProperty &&
-      nameProperty.title &&
-      nameProperty.title.length
-        ? nameProperty.title.map(function(item) {
-            return item.plain_text;
-          }).join('')
-        : 'Unnamed product';
+    if (!products.length) {
+      container.textContent = 'No products found.';
+      return;
+    }
 
-    return {
-      id: page.id,
-      name: name,
-      price: p.Price && p.Price.number != null
-        ? p.Price.number : 0,
-      quantity: p.Quantity && p.Quantity.number != null
-        ? p.Quantity.number : 0,
-      forResale: p['For resale']
-        ? p['For resale'].checkbox : false
-    };
-  });
-}
+    container.innerHTML = products.map(function(p) {
+      const item = document.createElement('div');
+      item.style.cssText =
+        'padding:14px 0;border-bottom:1px solid #eee;';
+
+      const name = document.createElement('strong');
+      name.textContent = p.name;
+
+      const details = document.createElement('div');
+      details.style.color = '#687386';
+      details.style.marginTop = '6px';
+      details.textContent =
+        'Price: ₹' + p.price +
+        ' | Stock: ' + p.quantity +
+        ' | ' + (p.forResale ? 'For resale' : 'Personal collection');
+
+      item.appendChild(name);
+      item.appendChild(details);
+
+      return item.outerHTML;
+    }).join('');
+  }
+
+  function filterInventory() {
+    const search = document.getElementById('search')
+      .value.toLowerCase();
+
+    const filtered = inventory.filter(function(p) {
+      return p.name.toLowerCase().includes(search);
+    });
+
+    displayInventory(filtered);
+  }
+
+  window.addEventListener('load', loadInventory);
+</script>
