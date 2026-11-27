@@ -1,6 +1,7 @@
 I have an existing Google Apps Script web application called Hot Wheels Manager.
 
-I need you to enhance its Inventory module. This is an existing working application, so do NOT rebuild it from scratch or unnecessarily change its architecture.
+I need you to enhance its Inventory module. This is an existing working application, 
+so do NOT rebuild it from scratch or unnecessarily change its architecture.
 
 1. Existing architecture
 
@@ -9,12 +10,17 @@ I need you to enhance its Inventory module. This is an existing working applicat
 - Database: Notion API
 - Frontend/backend communication: "google.script.run"
 - Notion API version: "2025-09-03"
-- Notion uses multiple data sources. The inventory is accessed through the Notion Data Source API, not the old database query endpoint.
-- Notion token and database/data source IDs are stored in Apps Script Script Properties.
-- The existing "getInventory()" function successfully retrieves inventory records from Notion.
+- Notion uses multiple data sources. The inventory is accessed through 
+the Notion Data Source API, not the old database query endpoint.
+- Notion token and database/data source IDs are stored in Apps Script
+Script Properties.
+- The existing "getInventory()" function successfully retrieves 
+inventory records from Notion.
 
 IMPORTANT:
-Inspect the existing code before making changes. Preserve the working authentication, API URL construction, request headers, data source ID retrieval and error handling wherever possible.
+Inspect the existing code before making changes. Preserve the working
+authentication, API URL construction, request headers, data source ID retrieval 
+and error handling wherever possible.
 
 2. Notion inventory properties
 
@@ -67,7 +73,8 @@ Each product card must show:
 - Product picture.
 - Product name.
 
-The card should be visually clean and compact. Clicking a card should open a product details view or modal.
+The card should be visually clean and compact. Clicking a card should
+open a product details view or modal.
 
 5. List view
 
@@ -91,9 +98,11 @@ Second line:
 - Cost Price
 - In Stock
 
-Preserve the colors of Notion Select options. For Color Tag, use the value returned by the formula property. For In Stock, use the formula result.
+Preserve the colors of Notion Select options. For Color Tag, use the value 
+returned by the formula property. For In Stock, use the formula result.
 
-Do not hardcode tag colors. Retrieve and retain the colors supplied by Notion wherever available.
+Do not hardcode tag colors. Retrieve and retain the colors supplied by Notion
+wherever available.
 
 6. Add Product functionality
 
@@ -117,11 +126,13 @@ Create an Add Product form with these fields:
 Important:
 
 - Formula fields must not be editable.
-- Select options should be loaded from the existing Notion data source schema or handled safely.
+- Select options should be loaded from the existing Notion data source schema
+or handled safely.
 - Validate required fields.
 - Support image upload.
 - Upload images to Google Drive using Apps Script.
-- Store the resulting image reference in the Notion Picture property using a supported Notion file-upload approach.
+- Store the resulting image reference in the Notion Picture property using
+a supported Notion file-upload approach.
 - Never expose the Notion API token in frontend JavaScript.
 
 7. Backend requirements
@@ -136,7 +147,8 @@ Extend "Code.gs" with the necessary functions:
 
 Preserve the current working Notion API integration.
 
-Use the correct Notion API endpoints for the existing multi-data-source architecture and the specified API version.
+Use the correct Notion API endpoints for the existing multi-data-source 
+architecture and the specified API version.
 
 Use "LockService" where appropriate to avoid conflicting writes.
 
@@ -157,7 +169,8 @@ Update "Index.html" with:
 - Error messages.
 - Success confirmation after adding a product.
 
-Use vanilla JavaScript and CSS. Do not introduce React, Node.js, npm or external frameworks.
+Use vanilla JavaScript and CSS.
+Do not introduce React, Node.js, npm or external frameworks.
 
 Keep the interface responsive for both mobile and desktop.
 
@@ -186,7 +199,8 @@ Avoid:
 - Oversized buttons.
 - Unnecessary animations.
 
-The inventory should feel like a polished personal collection-management application.
+The inventory should feel like a polished personal collection-management
+application.
 
 10. Critical development instructions
 
@@ -211,9 +225,11 @@ Do not replace the entire project with a new implementation.
 
 Do not invent property IDs, data source IDs, credentials, or API responses.
 
-If an API detail is uncertain, verify it against the existing code or official Notion API documentation.
+If an API detail is uncertain, verify it against the existing code 
+or official Notion API documentation.
 
-Provide complete updated code for each changed file, not isolated snippets that leave me guessing where to put them.
+Provide complete updated code for each changed file, 
+not isolated snippets that leave me guessing where to put them.
 
 Before finalizing, check for:
 
@@ -225,4 +241,5 @@ Before finalizing, check for:
 - Image upload compatibility.
 - Frontend/backend function name mismatches.
 
-I will test using the Apps Script Test Deployment (/dev). Ensure the solution works in that environment.
+I will test using the Apps Script Test Deployment (/dev).
+Ensure the solution works in that environment.
