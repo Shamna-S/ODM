@@ -1,84 +1,228 @@
+I have an existing Google Apps Script web application called Hot Wheels Manager.
 
-<div class="section">
-  <h3>Inventory</h3>
+I need you to enhance its Inventory module. This is an existing working application, so do NOT rebuild it from scratch or unnecessarily change its architecture.
 
-  <input
-    type="text"
-    id="search"
-    placeholder="Search Hot Wheels..."
-    oninput="filterInventory()"
-    style="width:100%;padding:12px;margin-bottom:16px;border:1px solid #ddd;border-radius:8px;"
-  >
+1. Existing architecture
 
-  <div id="inventoryList">
-    Loading inventory...
-  </div>
-</div>
+- Backend: Google Apps Script ("Code.gs")
+- Frontend: HTML, CSS and vanilla JavaScript ("Index.html")
+- Database: Notion API
+- Frontend/backend communication: "google.script.run"
+- Notion API version: "2025-09-03"
+- Notion uses multiple data sources. The inventory is accessed through the Notion Data Source API, not the old database query endpoint.
+- Notion token and database/data source IDs are stored in Apps Script Script Properties.
+- The existing "getInventory()" function successfully retrieves inventory records from Notion.
 
-<script>
-  let inventory = [];
+IMPORTANT:
+Inspect the existing code before making changes. Preserve the working authentication, API URL construction, request headers, data source ID retrieval and error handling wherever possible.
 
-  function loadInventory() {
-    google.script.run
-      .withSuccessHandler(function(products) {
-        inventory = products;
+2. Notion inventory properties
 
-        document.getElementById('products').textContent =
-          products.length;
+The inventory data source has these exact property names and types:
 
-        document.getElementById('stock').textContent =
-          products.reduce((sum, p) => sum + p.quantity, 0);
+Property| Notion type
+Name| title
+TH tag| select
+Tag| select
+Color Tag| formula
+Quantity| number
+In Stock| formula
+Color| select
+Personal collection| checkbox
+Cost Price| number
+sellingPrice| number
+Collection Quantity| number
+For Sale| checkbox
+Picture| files & media
+Details| rich text
 
-        displayInventory(products);
-      })
-      .withFailureHandler(function(error) {
-        document.getElementById('inventoryList').textContent =
-          'Could not load inventory: ' + error.message;
-      })
-      .getInventory();
-  }
+Do not rename these properties or assume different property types.
 
-  function displayInventory(products) {
-    const container = document.getElementById('inventoryList');
+3. Inventory interface
 
-    if (!products.length) {
-      container.textContent = 'No products found.';
-      return;
-    }
+When the user opens Inventory, show:
 
-    container.innerHTML = products.map(function(p) {
-      const item = document.createElement('div');
-      item.style.cssText =
-        'padding:14px 0;border-bottom:1px solid #eee;';
+- Search bar.
+- View toggle: Cards / List.
+- Filter: All.
+- Filter: Personal Collection.
+- Filter: For Sale.
+- Add Product action.
 
-      const name = document.createElement('strong');
-      name.textContent = p.name;
+Search should work using product name and relevant tag fields.
 
-      const details = document.createElement('div');
-      details.style.color = '#687386';
-      details.style.marginTop = '6px';
-      details.textContent =
-        'Price: ₹' + p.price +
-        ' | Stock: ' + p.quantity +
-        ' | ' + (p.forResale ? 'For resale' : 'Personal collection');
+Filters should use the actual Notion checkbox properties:
 
-      item.appendChild(name);
-      item.appendChild(details);
+- Personal Collection
+- For Sale
 
-      return item.outerHTML;
-    }).join('');
-  }
+Filters should work independently and correctly.
 
-  function filterInventory() {
-    const search = document.getElementById('search')
-      .value.toLowerCase();
+4. Card view
 
-    const filtered = inventory.filter(function(p) {
-      return p.name.toLowerCase().includes(search);
-    });
+Create an aesthetically pleasing responsive card layout.
 
-    displayInventory(filtered);
-  }
+Each product card must show:
 
-  window.addEventListener('load', loadInventory);
-</script>
+- Product picture.
+- Product name.
+
+The card should be visually clean and compact. Clicking a card should open a product details view or modal.
+
+5. List view
+
+Create a compact list layout.
+
+Omit the product picture entirely.
+
+Show the product name and all the following fields:
+
+First line:
+
+- Color Tag
+- Color
+- Tag
+- TH tag
+
+Second line:
+
+- Quantity
+- Selling Price
+- Cost Price
+- In Stock
+
+Preserve the colors of Notion Select options. For Color Tag, use the value returned by the formula property. For In Stock, use the formula result.
+
+Do not hardcode tag colors. Retrieve and retain the colors supplied by Notion wherever available.
+
+6. Add Product functionality
+
+Create an Add Product form with these fields:
+
+- Name
+- TH tag
+- Tag
+- Color Tag (read-only if formula)
+- Quantity
+- In Stock (read-only if formula)
+- Color
+- Personal collection checkbox
+- Cost Price
+- sellingPrice
+- Collection Quantity
+- For Sale checkbox
+- Picture upload
+- Details
+
+Important:
+
+- Formula fields must not be editable.
+- Select options should be loaded from the existing Notion data source schema or handled safely.
+- Validate required fields.
+- Support image upload.
+- Upload images to Google Drive using Apps Script.
+- Store the resulting image reference in the Notion Picture property using a supported Notion file-upload approach.
+- Never expose the Notion API token in frontend JavaScript.
+
+7. Backend requirements
+
+Extend "Code.gs" with the necessary functions:
+
+- Enhanced getInventory()
+- Add product to Notion
+- Upload picture to Google Drive
+- Handle image references safely
+- Retrieve select options if needed
+
+Preserve the current working Notion API integration.
+
+Use the correct Notion API endpoints for the existing multi-data-source architecture and the specified API version.
+
+Use "LockService" where appropriate to avoid conflicting writes.
+
+Return structured success/error responses to the frontend.
+
+8. Frontend requirements
+
+Update "Index.html" with:
+
+- Responsive card view.
+- Responsive list view.
+- Search.
+- Filters.
+- Add Product form.
+- Product details view/modal.
+- Loading indicator.
+- Empty inventory state.
+- Error messages.
+- Success confirmation after adding a product.
+
+Use vanilla JavaScript and CSS. Do not introduce React, Node.js, npm or external frameworks.
+
+Keep the interface responsive for both mobile and desktop.
+
+9. Design direction
+
+I want a premium, aesthetic Hot Wheels collection-management interface.
+
+Design preferences:
+
+- Modern minimal dashboard.
+- Soft neutral background.
+- White or subtle off-white cards.
+- Rounded corners.
+- Subtle shadows.
+- Clean typography.
+- Muted accent colors.
+- Small, tasteful colored labels.
+- Good spacing and alignment.
+- Clear visual hierarchy.
+
+Avoid:
+
+- Generic admin dashboard appearance.
+- Excessive bright colors.
+- Cluttered tables.
+- Oversized buttons.
+- Unnecessary animations.
+
+The inventory should feel like a polished personal collection-management application.
+
+10. Critical development instructions
+
+Work incrementally.
+
+FIRST:
+
+1. Inspect the entire existing Code.gs and Index.html.
+2. Explain the existing code structure.
+3. Identify what can be reused.
+4. Identify any missing Notion API functionality.
+
+THEN:
+5. Implement enhanced inventory retrieval.
+6. Implement card/list views and filtering.
+7. Implement Add Product and image upload.
+8. Test the integration.
+
+Do not delete existing working functions.
+
+Do not replace the entire project with a new implementation.
+
+Do not invent property IDs, data source IDs, credentials, or API responses.
+
+If an API detail is uncertain, verify it against the existing code or official Notion API documentation.
+
+Provide complete updated code for each changed file, not isolated snippets that leave me guessing where to put them.
+
+Before finalizing, check for:
+
+- JavaScript syntax errors.
+- Missing braces or closing tags.
+- Incorrect Notion property mappings.
+- Incorrect API endpoints.
+- Formula property handling.
+- Image upload compatibility.
+- Frontend/backend function name mismatches.
+
+I will test using the Apps Script Test Deployment (/dev). Ensure the solution works in that environment.
